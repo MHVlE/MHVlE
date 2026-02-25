@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nivel Arena TCG</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="card-preview-area">
+        <div id="main-preview"></div>
+        <div id="item-preview-container">
+            <p class="preview-label">장착한 아이템</p>
+            <div id="item-preview-list"></div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="opponent-side" class="side">
+            <div class="field-grid">
+                <div class="level-column">
+                    <div class="level-slots-container">
+                        <div class="level-slot base-level" data-lv="0">
+                            <span class="level-placeholder">Level<br>Zone</span>
+                        </div>
+                        <div class="level-slot" data-lv="1">1</div>
+                        <div class="level-slot" data-lv="2">2</div>
+                        <div class="level-slot" data-lv="3">3</div>
+                        <div class="level-slot" data-lv="4">4</div>
+                        <div class="level-slot" data-lv="5">5</div>
+                        <div class="level-slot" data-lv="6">6</div>
+                        <div class="level-slot" data-lv="7">7</div>
+                        <div class="level-slot" data-lv="8">8</div>
+                        <div class="level-slot" data-lv="9">9</div>
+                        <div class="level-slot level-10">10</div>
+                    </div>
+                </div>
+
+                <div class="main-area">
+                    <div class="unit-row">
+                        <div class="slot unit-slot" data-slot="1">
+                            <span class="slot-text">Unit<br>Zone</span>
+                        </div>
+                        <div class="slot unit-slot" data-slot="2">
+                            <span class="slot-text">Unit<br>Zone</span>
+                        </div>
+                        <div class="slot unit-slot" data-slot="3">
+                            <span class="slot-text">Unit<br>Zone</span>
+                        </div>
+                    </div>
+                    <div class="bottom-row">
+                        <div class="damage-zone" id="player-damage">
+                            <div class="damage-bg-layers">
+                                <div class="damage-base-slot">Damage<br>Zone</div>
+                                <div class="damage-ticks-container">
+                                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                                </div>
+                            </div>
+                            
+                            <div id="damage-cards-stack"></div>
+                        </div>
+                        <div class="slot skill-slot">
+                            <span class="slot-text">Skil<br>Zone</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="side-column">
+                    <div class="slot deck-zone">
+                        <span class="slot-text">Deck<br>Zone</span>
+                    </div>
+                    <div class="slot trash-zone">
+                        <span class="slot-text">Trash<br>Zone</span>
+                    </div>
+                </div>
+            <div id="opponent-hand" class="hand"></div>
+            </div>
+        </div>
+
+        <div id="battle-divider">LEVEL UP > DRAW > MAIN > ATTACK > END</div>
+
+        <div id="player-side" class="side">
+            <div class="field-grid">
+                <div class="level-column">
+                    <div class="level-slots-container">
+                        <div class="level-slot base-level" data-lv="0">
+                            <span class="level-placeholder">Level<br>Zone</span>
+                        </div>
+                        <div class="level-slot" data-lv="1">1</div>
+                        <div class="level-slot" data-lv="2">2</div>
+                        <div class="level-slot" data-lv="3">3</div>
+                        <div class="level-slot" data-lv="4">4</div>
+                        <div class="level-slot" data-lv="5">5</div>
+                        <div class="level-slot" data-lv="6">6</div>
+                        <div class="level-slot" data-lv="7">7</div>
+                        <div class="level-slot" data-lv="8">8</div>
+                        <div class="level-slot" data-lv="9">9</div>
+                        <div class="level-slot level-10">10</div>
+                    </div>
+                </div>
+
+                <div class="main-area">
+                    <div class="unit-row">
+                        <div class="slot unit-slot" data-slot="1">
+                            <span class="slot-text">Unit<br>Zone</span>
+                        </div>
+                        <div class="slot unit-slot" data-slot="2">
+                            <span class="slot-text">Unit<br>Zone</span>
+                        </div>
+                        <div class="slot unit-slot" data-slot="3">
+                            <span class="slot-text">Unit<br>Zone</span>
+                        </div>
+                    </div>
+                    <div class="bottom-row">
+                        <div class="damage-zone" id="player-damage">
+                            <div class="damage-bg-layers">
+                                <div class="damage-base-slot">Damage<br>Zone</div>
+                                <div class="damage-ticks-container">
+                                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                                </div>
+                            </div>
+                            
+                            <div id="damage-cards-stack"></div>
+                        </div>
+                        <div class="slot skill-slot">
+                            <span class="slot-text">Skil<br>Zone</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="side-column">
+                    <div class="slot deck-zone">
+                        <span class="slot-text">Deck<br>Zone</span>
+                    </div>
+                    <div class="slot trash-zone">
+                        <span class="slot-text">Trash<br>Zone</span>
+                    </div>
+                </div>
+            </div>
+            <div id="player-hand" class="hand"></div>
+        </div>
+    </div>
+    
+
+    <script src="cards.js"></script> 
+    <script src="script.js"></script>
+</body>
+</html>
