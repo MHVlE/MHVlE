@@ -1,0 +1,550 @@
+:root {
+    --card-w: 80px;
+    --card-h: 112px;
+    --h-card-w: 112px;
+    --h-card-h: 80px;
+    --bg-slot: rgba(255, 255, 255, 0.05);
+    --border-slot: 1px solid #444;
+}
+
+/* 1. 전체 폰트 및 배경 */
+body { 
+    margin: 0; 
+    background: #000; 
+    color: #fff; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    overflow: hidden; 
+}
+
+/* 덱과 트래시 존은 클릭이 가능해야 카드를 보낼 수 있습니다 */
+.deck-zone, .trash-zone {
+    pointer-events: auto !important; /* 클릭 차단 해제 */
+    cursor: pointer;
+    position: relative;
+    z-index: 5; /* 클릭 우선순위 확보 */
+}
+
+/* 존 내부의 글자만 클릭을 통과시킵니다 */
+.deck-zone .slot-text, .trash-zone .slot-text {
+    pointer-events: none;
+}
+
+
+.slot-text, 
+.level-placeholder,
+.unit-slot, 
+.skill-slot, 
+.deck-zone, 
+.trash-zone {
+    color: rgba(255, 255, 255, 0.7); /* 밝은 흰색 계열 (80% 불투명도) */
+    font-weight: 500;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* 검정 배경에서 더 잘 보이게 그림자 추가 */
+    text-align: center;
+    pointer-events: none; /* 텍스트가 클릭을 방해하지 않음 */
+}
+
+/* 슬롯 내부의 모든 텍스트와 자식 요소들이 클릭을 통과시키게 함 */
+.slot-text, 
+.level-placeholder,
+.slot span {
+    pointer-events: none !important; 
+    user-select: none; /* 텍스트 선택 방지 */
+}
+
+/* 슬롯 자체는 클릭이 가능해야 함 */
+.unit-slot, .skill-slot, .skil-slot, .level-slot, .damage-zone {
+    pointer-events: auto !important;
+    cursor: pointer;
+}
+
+/* 유닛 존/스킬 존 슬롯 자체의 클릭 영역 확보 */
+.unit-slot, .skill-slot {
+    cursor: pointer;
+    z-index: 2; /* 우선순위 높임 */
+}
+
+/* 하이라이트 되었을 때 클릭 가능함을 시각적으로 표시 */
+.highlight-target {
+    border: 2px solid #ffff00 !important;
+    box-shadow: inset 0 0 10px rgba(255, 255, 0, 0.5);
+}
+
+/* 개별 존 텍스트 색상 강제 지정 (필요시) */
+.unit-slot, .skill-slot, .deck-zone, .trash-zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+#game-container { height: 100vh; display: flex; flex-direction: column; }
+
+.side { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    width: 100%;
+}
+
+/* 2. 필드 밀착 정렬 */
+#opponent-side { transform: rotate(180deg); margin-bottom: -9px; } 
+#player-side { margin-top: -15px; }
+
+.field-grid { 
+    display: grid; 
+    grid-template-columns: 120px auto 120px; 
+    gap: 15px; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.level-column { grid-column: 1; justify-self: end; }
+.main-area { grid-column: 2; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.side-column { grid-column: 3; justify-self: start; display: flex; flex-direction: column; gap: 10px; }
+
+#opponent-side .unit-row, #opponent-side .bottom-row { flex-direction: row-reverse; }
+.unit-row { display: flex; gap: 10px; justify-content: center; }
+.bottom-row { display: flex; gap: 10px; align-items: flex-end; justify-content: center; }
+
+/* 3. 슬롯 및 카드 디자인 */
+.slot {
+    width: var(--card-w);
+    height: var(--card-h);
+    border: var(--border-slot);
+    background: var(--bg-slot);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 11px;
+    font-family: inherit; 
+    line-height: 1.2;
+    border-radius: 4px;
+    box-sizing: border-box;
+    position: relative; /* 카드 배치를 위함 */
+    overflow: hidden;
+}
+
+.card {
+    width: var(--card-w);
+    height: var(--card-h);
+    border: 1px solid #666;
+    background: #222;
+    border-radius: 4px;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    transition: transform 0.2s, outline 0.2s;
+    z-index: 5;
+}
+
+/* 선택 및 타겟 강조 효과 */
+.card-selected {
+    outline: 2px solid #ffff00 !important;
+    transform: translateY(-10px);
+    z-index: 10;
+}
+
+.highlight-target {
+    border: 2px solid #ffff00 !important;
+    background: rgba(255, 255, 0, 0.1) !important;
+    box-shadow: inset 0 0 15px rgba(255, 255, 0, 0.3);
+    cursor: pointer;
+}
+
+/* 4. 대미지 존 */
+.damage-zone { 
+    position: relative; /* 자식 요소(카드) 배치의 기준점 */
+    display: flex;
+    width: 350px; /* 전체 너비 고정 */
+    height: var(--card-h);
+    border: var(--border-slot);
+    background: #000;
+    overflow: hidden;
+    text-align: center;
+}
+/* 0~9 숫자 레이어 (카드 뒤에 배경처럼 깔림) */
+.damage-bg-layers {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    z-index: 1;
+    pointer-events: none; /* 중요: 클릭이 이 레이어를 뚫고 부모(damage-zone)에 닿게 함 */
+}
+
+/* 카드들이 쌓일 공간 */
+#damage-cards-stack {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 5;
+    pointer-events: none; /* 카드가 없을 때는 클릭이 통과되어야 함 */
+}
+
+/* 대미지 존 내 카드 개별 스타일 */
+#damage-cards-stack .card {
+    position: absolute; /* 공간 차지 안 함 */
+    top: 0;
+    width: var(--card-w);
+    height: var(--card-h);
+    margin: 0 !important;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.8);
+    transition: left 0.3s ease;
+    pointer-events: auto;
+}
+.damage-base-slot {
+    width: var(--card-w); /* 첫 카드와 너비 일치 */
+    border-right: 1px dashed #555;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+.damage-base-slot .num { position: absolute; top: 4px; right: 6px; font-size: 10px; color: #666; font-weight: normal; }
+.damage-ticks-container { display: flex; flex: 1; }
+.damage-ticks-container span { 
+    flex: 1;
+    border-right: 1px solid #333; 
+    display: flex; 
+    justify-content: center; 
+    padding-top: 5px; 
+    color: #fff; 
+    font-size: 9px;
+}
+
+/* 대미지 존에 들어가는 카드 전용 스타일 */
+.damage-zone .card {
+    position: absolute; /* 공간을 차지하지 않고 겹침 */
+    top: -1px; /* 테두리 보정 */
+    width: var(--card-w);
+    height: var(--card-h);
+    margin: 0 !important; /* 밀림 방지 */
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5); /* 겹침 경계선 */
+}
+
+/* 하이라이트 효과가 데미지 존 전체에 보이도록 */
+.damage-zone.highlight-target {
+    border: 2px solid #ffff00 !important;
+    cursor: pointer;
+}
+
+/* 5. 레벨 존 */
+.level-slots-container { 
+    width: var(--h-card-w);
+    display: flex; flex-direction: column-reverse; 
+    border: var(--border-slot); background: #111; border-radius: 4px; overflow: hidden;
+    position: relative;
+}
+
+.level-slot { 
+    width: 100%; 
+    height: 14px; 
+    border-top: 1px solid #333; 
+    font-size: 10px; 
+    display: flex; 
+    overflow: visible;
+    align-items: center; 
+    justify-content: center; 
+    position: relative; /* 카드 배치의 기준 */
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.level-slot.base-level { 
+    height: var(--h-card-h); 
+    background: var(--bg-slot); 
+    border-top: 1px solid #333; 
+    font-size: 12px; 
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 레벨 존 내의 카드 스타일 */
+.level-slot .card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    border: none !important;
+    /* 가로형 슬롯에 맞게 이미지 조절 */
+    background-size: cover; 
+    background-position: center;
+    z-index: 10;
+}
+
+/* 레벨 존 내 리더 카드 전용 스타일 */
+.level-slot .leader-card {
+    position: absolute; /* 슬롯의 레이아웃을 무시하고 배치 */
+    top: 0 !important; /* 슬롯의 윗부분을 기준으로 정렬 */
+    width: var(--h-card-w) !important; /* 슬롯보다 넓은 원래 카드 너비 유지 */
+    height: var(--h-card-h) !important; /* 슬롯보다 높은 원래 카드 높이 유지 */
+    z-index: 100;      /* 다른 레벨 숫자보다 위에 표시 */
+    pointer-events: auto;
+    border-radius: 6px !important; /* 아까 적용한 라운드 유지 */
+    background-size: cover;
+    background-position: center;
+    left: 0;
+}
+
+/* 리더가 올라간 슬롯의 숫자만 가리기 */
+.level-slot:has(.leader-card) {
+    color: transparent;
+}
+
+/* 기본 안내 문구 스타일 */
+.level-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    color: #fff;
+    z-index: 1; /* 카드보다 아래 */
+    pointer-events: none; /* 클릭 방해 금지 */
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 중요: 해당 슬롯에 .leader-card가 존재할 때만 글자를 숨김 */
+.level-slot:has(.leader-card) .level-placeholder {
+    display: none;
+}
+
+/* 레벨 숫자가 적힌 다른 슬롯들도 동일하게 적용 (선택 사항) */
+.level-slot:has(.leader-card) {
+    color: transparent; /* 숫자가 적힌 span이나 text가 있다면 투명하게 */
+}
+
+/* 6. UI 요소 */
+#battle-divider { 
+    width: 100%; height: 26px; background: #0a0a0a; border-top: 1px solid #222; border-bottom: 1px solid #222;
+    font-size: 10px; display: flex; align-items: center; justify-content: center; color: #666; letter-spacing: 2px;
+}
+.hand { height: 120px; display: flex; justify-content: center; gap: 8px; padding: 10px; width: 100%; }
+
+/* 카드 이름표 */
+.card-label {
+    position: absolute; bottom: 0; width: 100%;
+    background: rgba(0,0,0,0.7); font-size: 9px; color: #fff;
+    text-align: center; padding: 2px 0; pointer-events: none;
+}
+
+/* 레벨 존 내 리더 카드 전용 */
+.leader-card {
+    width: var(--h-card-w) !important;
+    height: var(--h-card-h) !important;
+    position: absolute !important;
+    border: none !important;
+    border-radius: 6px !important; /* 카드 자체에도 라운드를 명확히 부여 */
+    background-size: contain; /* 이미지 비율 유지하며 꽉 채움 */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    z-index: 100;
+    transition: all 0.2s ease; /* 부드러운 이동 효과 */
+    /* 슬롯의 바닥에 카드 하단을 맞춤 */
+    bottom: 0; 
+    left: 0;
+    pointer-events: auto;
+    transition: background-image 0.3s ease, bottom 0.2s ease, transform 0.3s;
+}
+
+
+/* 중요: 슬롯 안에 .card 클래스가 존재하면 .slot-text를 숨김 */
+.slot:has(.card) .slot-text {
+    opacity: 0;
+    visibility: hidden;
+    color: transparent; /* 숫자 숨김 */
+}
+
+/* 안내 텍스트를 카드 뒤에 중앙 배치 */
+.slot-text {
+    position: absolute;
+    z-index: 1; /* 낮은 우선순위 */
+    color: #fff;
+    text-align: center;
+    pointer-events: none;
+    transition: opacity 0.2s; /* 부드럽게 나타남 */
+}
+
+/* 스킬 슬롯 설정 */
+.skill-slot {
+    position: relative; /* 자식(카드)의 absolute 기준점 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible; /* 카드가 슬롯보다 커도 보일 수 있게 */
+}
+
+/* 스킬 존에 들어가는 카드 공통 */
+.skill-slot .card {
+    position: absolute; /* 공간을 차지하지 않고 겹침 */
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    transition: transform 0.2s; /* 살짝 겹치는 느낌을 위한 효과 */
+}
+
+/* 나중에 온 카드가 살짝 아래로 내려오거나 겹쳐 보이게 하고 싶다면 */
+.skill-slot .card:not(:first-child) {
+    top: 5px; /* 미세하게 아래로 어긋나게 해서 겹침 표시 */
+    left: 5px;
+}
+
+/* 덱 존으로 이동 시 뒷면 처리 */
+.card.card-back {
+    background-image: url('image/card_back.jpg') !important; /* 뒷면 이미지 경로로 수정하세요 */
+    background-color: #1a1a1a;
+}
+
+/* 덱/트래시 존 내부 카드 정렬 (스택) */
+.deck-zone, .trash-zone {
+    position: relative;
+    overflow: visible;
+}
+
+/* 이름표 숨기기 (덱에 있을 때는 이름이 안 보여야 자연스러움) */
+.card.card-back .card-label {
+    display: none;
+}
+
+/* 데미지 존 정렬 애니메이션 */
+#damage-cards-stack .card {
+    transition: left 0.3s ease, z-index 0s;
+}
+
+/* 하이라이트 상태일 때는 내부의 카드가 클릭을 방해하지 않도록 설정 */
+.slot.highlight-target .card {
+    pointer-events: none !important;
+}
+
+/* 덱과 트래시 존의 클릭 영역을 카드보다 살짝 크게 보이게 하거나 우선순위 상향 */
+.deck-zone, .trash-zone {
+    overflow: visible !important; /* 카드가 넘쳐도 영역 유지 */
+}
+
+/* 슬롯의 가상 요소를 활용해 클릭 면적 확보 */
+.slot.highlight-target::after {
+    content: "";
+    position: absolute;
+    top: -5px; left: -5px; right: -5px; bottom: -5px;
+    z-index: 999; /* 모든 카드보다 위에서 클릭을 받음 */
+    cursor: pointer;
+}
+
+/* 패 구역 하이라이트 스타일 추가 */
+#player-hand.highlight-target {
+    background: rgba(255, 255, 0, 0.05);
+    border-radius: 8px;
+    outline: 2px dashed var(--highlight-color);
+    outline-offset: 4px;
+}
+
+/* 덱/트래시 존 내의 카드 클릭 범위 개선 (이전 가이드 유지) */
+.deck-zone.highlight-target::after, 
+.trash-zone.highlight-target::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 999;
+}
+
+/* 아이템 카드 전용 스타일 */
+.card.item-card {
+    filter: brightness(0.8); /* 장착 중에는 살짝 어둡게 표시 */
+    border: 1px dashed #aaa;
+    transition: transform 0.2s;
+}
+
+/* 유닛 슬롯에 마우스를 올리면 아이템이 살짝 튀어나오게 설정 */
+.unit-slot:hover .item-card {
+    transform: translateY(15px); /* 마우스 올리면 아이템이 더 많이 보임 */
+    z-index: 6; /* 일시적으로 위로 올림 */
+}
+
+/* 유닛 카드와 아이템 카드의 구분 */
+.unit-slot .card:not(.item-card) {
+    z-index: 5;
+    position: relative;
+}
+
+/* 1. 프리뷰 영역 스타일 */
+#card-preview-area {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    width: auto; 
+    min-width: 220px;
+    z-index: 9999 !important; /* 최상단 보장 */
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#main-preview {
+    width: 280px; 
+    height: 280px;
+    border-radius: 8px;
+    background-size: contain; /* 이미지가 잘리지 않고 영역 안에 다 들어오도록 */
+    background-repeat: no-repeat;
+    box-shadow: 0 0 30px rgba(0,0,0,0.9);
+    display: none; /* JS에서 block으로 변경 */
+    /* transition을 추가하면 크기 변화가 부드러워집니다 */
+    transition: width 0.2s, height 0.2s;
+    background-position: top;
+}
+
+#item-preview-container {
+    display: none;
+    padding: 12px;
+    border-radius: 8px;
+    width: 255px;
+    background-position: center;
+}
+
+.preview-label {
+    font-size: 10px;
+    color: #fff;
+    margin: 0 0 5px 0;
+    text-align: center;
+}
+
+#item-preview-list {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+#item-preview-list .item-thumb {
+    width: 50px;
+    height: 70px;
+    background-size: cover;
+    border: 1px solid #fff;
+    border-radius: 4px;
+}
+
+/* 2. 점선 버그 수정 */
+.card.item-card {
+    border: 2px dashed #ffff00 !important; /* 장착 시에만 점선 */
+}
+
+/* 유닛 존 이외의 곳에 있는 카드는 강제로 점선 제거 */
+#player-hand .card, 
+.deck-zone .card, 
+.trash-zone .card, 
+.damage-zone .card {
+    border: 1px solid #666 !important;
+}
+
